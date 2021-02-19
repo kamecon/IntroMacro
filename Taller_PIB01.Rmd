@@ -12,6 +12,7 @@ runtime: shiny
 ```{r setup, include=FALSE}
 library(flexdashboard)
 library(tidyverse)
+library(plotly)
 #library(ggthemes)
 load("PIB_OECD02.RData")
 ```
@@ -39,20 +40,33 @@ Column
 
 ```{r}
 selectedData <- reactive({
-  PIB_OECD02 %>% dplyr::filter(LOCATION == input$pais & MEASURE %in% c("C", "VOB") & label == "Gross domestic product (expenditure approach)"  & obsTime >=1995 )
+  PIB_OECD02 %>%
+  dplyr::filter(LOCATION == "ESP" & MEASURE %in% c("C", "VOB") & label == "Gross domestic product (expenditure approach)"  & obsTime >=1995 ) %>% 
+  select(obsTime, obsValue, MEASURE) %>%
+  pivot_wider(names_from = MEASURE, values_from = obsValue) %>%
+  rename(fecha = obsTime, Nominal = C, Real = VOB) 
 })
 
-renderPlot({
+renderPlotly({
   datos <- selectedData()
-  measure.labs <- c("Nominal", "Real")
-  names(measure.labs) <- c("C","VOB")
-  grafico <- ggplot(datos,aes(x=obsTime, y= obsValue, group=1))+
-  geom_line(colour="#000099")+
-  facet_wrap(~MEASURE,nrow = 2, labeller = labeller(MEASURE = measure.labs))+
-  labs(title = "PIB nominal y real")+
-  xlab("Fecha")+
-  ylab("PIB")
-  grafico
+ grafico <- plot_ly(datos, x = ~fecha)
+ grafico <- grafico %>% add_trace(y = ~Nominal, name = 'PIB Nominal', mode = 'lines+markers')
+ grafico <- grafico %>% add_trace(y = ~Real, name = 'PIB Real', mode = 'lines+markers')
+ f <- list(
+  family = "Courier New, monospace",
+  size = 18,
+  color = "#7f7f7f"
+  )
+ x <- list(
+  title = "Año",
+  titlefont = f
+  )
+ y <- list(
+  title = "PIB nominal y real",
+  titlefont = f
+  )
+ grafico <- grafico %>% layout(xaxis = x, yaxis = y)
+
 })
 ```
 
@@ -69,17 +83,18 @@ selectedData2 <- reactive({
   PIB_OECD02 %>% dplyr::filter(LOCATION == input$pais & TRANSACT %in% c("P31S14_S15", "P3S13", "P5", "B11") & MEASURE ==  "VOB" & obsTime >=1995 )
 })
 
-renderPlot({
+renderPlotly({
   datos2 <- selectedData2()
   transact.labs <- c("Consumo privado", "Consumo público", "Inversión", "XN")
   names(transact.labs) <- c("P31S14_S15", "P3S13", "P5", "B11")
-  ggplot(datos2, aes(x=obsTime, y= obsValue, group=1))+
+  graf3 <- ggplot(datos2, aes(x=obsTime, y= obsValue, group=1))+
   geom_line(colour="#000099")+
   facet_wrap(~TRANSACT, labeller = labeller(TRANSACT=transact.labs), scales = "free")+
   labs(title = "Componentes del PIB")+
   xlab("Fecha")+
   ylab("Componentes")+
-  scale_x_continuous(breaks = scales::breaks_width(2))
+  scale_x_continuous(breaks = scales::breaks_width(4))
+  ggplotly(graf3)
 })
 ```
 
@@ -93,13 +108,24 @@ selectedData3 <- reactive({
   PIB_OECD02 %>% dplyr::filter(LOCATION == input$pais & MEASURE == "G" & label == "Gross domestic product (expenditure approach)"  & obsTime >=1995 )
 })
 
-renderPlot({
+renderPlotly({
   datos3 <- selectedData3()
-  ggplot(datos3, aes(x=obsTime, y= obsValue, group=1))+
-  geom_line(colour="#000099")+
-  labs(title = "Variación PIB real")+
-  xlab("Fecha")+
-  ylab("PIB")
+  grafico2 <- plot_ly(datos3, x = ~obsTime)
+  grafico2 <- grafico2 %>% add_trace(y = ~obsValue, name = 'Variación PIB Real', mode = 'lines+markers')
+  f <- list(
+    family = "Courier New, monospace",
+    size = 18,
+    color = "#7f7f7f"
+  )
+  x <- list(
+    title = "Año",
+    titlefont = f
+  )
+  y <- list(
+    title = "Variación PIB real (%)",
+    titlefont = f
+  )
+  grafico2 <- grafico2 %>% layout(xaxis = x, yaxis = y)
 })
 ```
 
@@ -115,16 +141,17 @@ selectedData4 <- reactive({
   PIB_OECD02 %>% dplyr::filter(LOCATION == input$pais & TRANSACT %in% c("P31S14_S15", "P3S13", "P5", "B11") & MEASURE ==  "G" & obsTime >=1995 )
 })
 
-renderPlot({
+renderPlotly({
   datos4 <- selectedData4()
   transact.labs <- c("Consumo privado", "Consumo público", "Inversión", "XN")
   names(transact.labs) <- c("P31S14_S15", "P3S13", "P5", "B11")
-  ggplot(datos4, aes(x=obsTime, y= obsValue, group=1))+
+  graf4 <- ggplot(datos4, aes(x=obsTime, y= obsValue, group=1))+
   geom_line(colour="#000099")+
   facet_wrap(~TRANSACT, labeller = labeller(TRANSACT=transact.labs), scales = "free")+
   labs(title = "Componentes del PIB")+
   xlab("Fecha")+
-  ylab("Componentes")+
-  scale_x_continuous(breaks = scales::breaks_width(2))
+  ylab("Variación porcentual (%)")+
+  scale_x_continuous(breaks = scales::breaks_width(4))
+  ggplotly(graf4)
 })
 ```

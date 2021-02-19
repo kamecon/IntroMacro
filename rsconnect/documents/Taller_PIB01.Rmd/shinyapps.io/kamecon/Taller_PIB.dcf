@@ -1,0 +1,12 @@
+name: Taller_PIB
+title: Taller_PIB
+username:
+account: kamecon
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 3666621
+bundleId: 4246217
+url: https://kamecon.shinyapps.io/Taller_PIB/
+when: 1613761136.24538
+asMultiple: FALSE
+asStatic: FALSE
