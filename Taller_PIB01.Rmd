@@ -1,0 +1,130 @@
+---
+title: "PIB"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    social: menu
+    vertical_layout: fill
+    source_code: embed
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(tidyverse)
+#library(ggthemes)
+load("PIB_OECD02.RData")
+```
+
+
+Column {.sidebar}
+=====================================
+
+### Menu
+
+```{r}
+selectInput('pais', 'País', PIB_OECD02$LOCATION %>% unique())
+
+```
+
+
+
+PIB nominal y real
+=====================================  
+
+Column 
+-----------------------------------------------------------------------
+
+### Grafico 
+
+```{r}
+selectedData <- reactive({
+  PIB_OECD02 %>% dplyr::filter(LOCATION == input$pais & MEASURE %in% c("C", "VOB") & label == "Gross domestic product (expenditure approach)"  & obsTime >=1995 )
+})
+
+renderPlot({
+  datos <- selectedData()
+  measure.labs <- c("Nominal", "Real")
+  names(measure.labs) <- c("C","VOB")
+  grafico <- ggplot(datos,aes(x=obsTime, y= obsValue, group=1))+
+  geom_line(colour="#000099")+
+  facet_wrap(~MEASURE,nrow = 2, labeller = labeller(MEASURE = measure.labs))+
+  labs(title = "PIB nominal y real")+
+  xlab("Fecha")+
+  ylab("PIB")
+  grafico
+})
+```
+
+
+Componentes del PIB
+=====================================
+
+
+
+### Grafico 
+
+```{r}
+selectedData2 <- reactive({
+  PIB_OECD02 %>% dplyr::filter(LOCATION == input$pais & TRANSACT %in% c("P31S14_S15", "P3S13", "P5", "B11") & MEASURE ==  "VOB" & obsTime >=1995 )
+})
+
+renderPlot({
+  datos2 <- selectedData2()
+  transact.labs <- c("Consumo privado", "Consumo público", "Inversión", "XN")
+  names(transact.labs) <- c("P31S14_S15", "P3S13", "P5", "B11")
+  ggplot(datos2, aes(x=obsTime, y= obsValue, group=1))+
+  geom_line(colour="#000099")+
+  facet_wrap(~TRANSACT, labeller = labeller(TRANSACT=transact.labs), scales = "free")+
+  labs(title = "Componentes del PIB")+
+  xlab("Fecha")+
+  ylab("Componentes")+
+  scale_x_continuous(breaks = scales::breaks_width(2))
+})
+```
+
+PIB real (variación porcentual)
+=====================================
+
+### Grafico 
+
+```{r}
+selectedData3 <- reactive({
+  PIB_OECD02 %>% dplyr::filter(LOCATION == input$pais & MEASURE == "G" & label == "Gross domestic product (expenditure approach)"  & obsTime >=1995 )
+})
+
+renderPlot({
+  datos3 <- selectedData3()
+  ggplot(datos3, aes(x=obsTime, y= obsValue, group=1))+
+  geom_line(colour="#000099")+
+  labs(title = "Variación PIB real")+
+  xlab("Fecha")+
+  ylab("PIB")
+})
+```
+
+
+Componentes del PIB (variación porcentual)
+=====================================
+
+
+### Grafico 
+
+```{r}
+selectedData4 <- reactive({
+  PIB_OECD02 %>% dplyr::filter(LOCATION == input$pais & TRANSACT %in% c("P31S14_S15", "P3S13", "P5", "B11") & MEASURE ==  "G" & obsTime >=1995 )
+})
+
+renderPlot({
+  datos4 <- selectedData4()
+  transact.labs <- c("Consumo privado", "Consumo público", "Inversión", "XN")
+  names(transact.labs) <- c("P31S14_S15", "P3S13", "P5", "B11")
+  ggplot(datos4, aes(x=obsTime, y= obsValue, group=1))+
+  geom_line(colour="#000099")+
+  facet_wrap(~TRANSACT, labeller = labeller(TRANSACT=transact.labs), scales = "free")+
+  labs(title = "Componentes del PIB")+
+  xlab("Fecha")+
+  ylab("Componentes")+
+  scale_x_continuous(breaks = scales::breaks_width(2))
+})
+```

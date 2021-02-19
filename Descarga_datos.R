@@ -1,0 +1,108 @@
+###Cargamos e instalamos las librerias  ------------------------
+
+if (! ('pacman' %in% installed.packages())) install.packages('pacman')
+pacman::p_load(tidyverse, OECD, ggthemes, entsoeapi, zoo, covid19mobility, xlsx)
+
+###Datos PIB (OECD) ------------------------
+
+#Creamos un filtro con los paises y conceptos que deseamos descargar
+
+filtro <- list( c("CAN","FRA","DEU","ITA","JPN","PRT","ESP","GBR","USA", "GBR", "NLD", "DNK", "AUS", "AUT", "BEL"),
+                c("B1_GE","P3_P5","P3","P31S14_S15","P3S13","P5","P51","P52_P53","B11","P6","P7"),
+                c("C","VOB","G"),
+                c("1995", "1996", "1997", "1998", "1999", "2000", "2001", "2002", "2003", "2004", "2005", "2006", "2007", "2008", "2009", "2010", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019","2020")
+)
+
+
+#Vemos la estructura de la tabla o base de datos que deseamos descargar
+
+PIB_OECD_sucio <- get_data_structure("SNA_TABLE1")
+
+#Descargamos los datos
+
+PIB_OECD <- get_dataset(dataset = "SNA_TABLE1", filter = filtro)
+
+#Hacemos un join (fusión de tablas) para poder tener una columna con el nombre de los conceptos asociados a cada código
+
+PIB_OECD02 <- PIB_OECD %>% 
+  left_join(PIB_OECD_sucio$TRANSACT, by = c("TRANSACT"="id"))
+
+#Convertimos la fecha en numérico
+
+PIB_OECD02$obsTime <- as.numeric(PIB_OECD02$obsTime)
+
+#Guardamos los datos para poder acceder a ellos luego
+
+save(PIB_OECD02, file = "PIB_OECD02.RData")
+
+
+###Datos Movilidad (Google) ------------------------
+
+#Descargamos los datos
+
+goog <- refresh_covid19mobility_google_country()
+
+#Filtramos los datos y nos quedamos con los paises que nos interesan
+
+movilidad <- goog %>% 
+  dplyr::filter(location_code %in% c("DE","DK","FR","IT","ES","PT","NL","AT","GR","GB"))
+
+#Guardamos los datos para poder acceder a ellos luego
+
+save(movilidad, file = "movilidad.RData")
+
+###Datos Movilidad (Apple) ------------------------
+
+#Descargamos los datos
+
+apple <- refresh_covid19mobility_apple_country()
+
+
+#Filtramos los datos y nos quedamos con los paises que nos interesan
+
+movilidad_apple <- apple %>% 
+  dplyr::filter(location_code %in% c("DE","DK","FR","IT","ES","PT","NL","AT","GR","GB"))
+
+#Guardamos los datos para poder acceder a ellos luego
+
+save(movilidad_apple, file = "movilidad_apple.RData")
+
+
+###Datos Entsoe (Demanda electrica) ------------------------
+
+#Seleccionamos los paises. Creamos dos vectores: uno con el nombre de los paises y otro con los códigos usados por Entsoe
+
+paises <- en_eic() %>% 
+  filter(AreaTypeCode == "CTY" & AreaName %in% c("Spain", "France", "Italy", "Germany", "Portugal", "United Kingdom", "Austria", "Belgium", "Netherlands", "Denmark")) %>% 
+  select(AreaCode, AreaName)
+
+paises_cod <- paises %>% 
+  pull(1)
+
+paises_name <- paises %>% 
+  pull(2)
+
+
+#Creamos una lista para rellenar con la información de los paises
+
+EntsoePaises <- list()
+
+#Aplicamos un bucle (loop) para descargar los datos de Entsoe y guardarlos en la lista
+
+for (i in seq_along(paises_cod)) {
+  
+  EntsoePaises[[paises_name[i]]] <- en_load_actual_total_load(eic = paises_cod[i],
+                                                              period_start = lubridate::ymd(as.character(Sys.Date() - 370), tz = "UTC"),
+                                                              period_end = lubridate::ymd_hm(paste0(Sys.Date() - 1," 23:00"), tz = "UTC"),
+                                                              security_token = "cd15b9e9-ac50-4a2e-b949-1fe1583859f7"
+  )
+  
+}
+
+#Guardamos los datos para poder acceder a ellos luego
+
+save(EntsoePaises, file = "EntsoePaises.RData")
+
+
+
+
