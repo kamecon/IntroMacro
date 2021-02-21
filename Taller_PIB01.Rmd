@@ -1,5 +1,6 @@
 ---
 title: "PIB"
+author: "Kamal Romero"
 output: 
   flexdashboard::flex_dashboard:
     orientation: columns
@@ -41,7 +42,7 @@ Column
 ```{r}
 selectedData <- reactive({
   PIB_OECD02 %>%
-  dplyr::filter(LOCATION == "ESP" & MEASURE %in% c("C", "VOB") & label == "Gross domestic product (expenditure approach)"  & obsTime >=1995 ) %>% 
+  dplyr::filter(LOCATION == input$pais & MEASURE %in% c("C", "VOB") & label == "Gross domestic product (expenditure approach)"  & obsTime >=1995 ) %>% 
   select(obsTime, obsValue, MEASURE) %>%
   pivot_wider(names_from = MEASURE, values_from = obsValue) %>%
   rename(fecha = obsTime, Nominal = C, Real = VOB) 

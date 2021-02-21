@@ -1,5 +1,6 @@
 ---
 title: "Actividad económica (alta frecuencia)"
+author: "Kamal Romero"
 output: 
   flexdashboard::flex_dashboard:
     orientation: columns
@@ -50,7 +51,7 @@ selectInput('desp', 'Tipo de Desplazamiento', movilidad %>%
 Column 
 -----------------------------------------------------------------------
 
-### Grafico 
+### Datos de movilidad de Google (librería covid19mobility) 
 
 ```{r}
 selectedData <- reactive({
@@ -106,7 +107,7 @@ selectInput('desp2', 'Tipo de Desplazamiento', movilidad_apple %>%
 Column 
 -----------------------------------------------------------------------
 
-### Grafico 
+### Datos de movilidad de Apple (librería covid19mobility) 
 
 ```{r}
 selectedData2 <- reactive({
@@ -149,7 +150,7 @@ selectInput('pais3', 'País', EntsoePaises %>% names)
 Column 
 -----------------------------------------------------------------------
 
-### Grafico 
+### Datos de consumo eléctrico (librería entsoeapi) 
 
 ```{r}
 selectedData3 <- reactive({
