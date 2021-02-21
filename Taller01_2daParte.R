@@ -52,6 +52,8 @@ movilidad %>%
 
 ###Datos de movilidad (Apple)-------------
 
+load("movilidad_apple.RData")
+
 pais <- movilidad_apple %>%
   dplyr::filter(location_code == "ES") %>% 
   pull(location) %>% 

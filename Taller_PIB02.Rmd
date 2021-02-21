@@ -1,0 +1,205 @@
+---
+title: "Actividad económica (alta frecuencia)"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    social: menu
+    vertical_layout: fill
+    source_code: embed
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(tidyverse)
+library(plotly)
+library(ggthemes)
+load("movilidad.RData")
+load("movilidad_apple.RData")
+load("EntsoePaises.RData")
+```
+
+
+
+Datos Movilidad Google
+=====================================  
+
+Column {.sidebar}
+-----------------------------------------------------------------------
+
+### Menu
+
+```{r}
+selectInput('pais', 'País', movilidad$location %>% unique())
+
+selectInput('desp', 'Tipo de Desplazamiento', movilidad %>%
+    dplyr::filter(location_code == "ES") %>% 
+    mutate(desplazamiento = case_when(data_type == "retail_and_recreation_perc_ch" ~ "Comercio y Recreación",
+                                      data_type == "grocery_and_pharmacy_perc_ch" ~ "Supermercados y Farmacias",
+                                      data_type == "parks_perc_ch" ~ "Parques",
+                                      data_type == "transit_stations_perc_ch" ~ "Estaciones Transporte",
+                                      data_type == "workplaces_perc_ch" ~ "Trabajo",
+                                      data_type == "residential_perc_ch" ~ "Residencia" )) %>%
+      pull(desplazamiento) %>%
+      unique()
+    )
+
+```
+
+
+Column 
+-----------------------------------------------------------------------
+
+### Grafico 
+
+```{r}
+selectedData <- reactive({
+  movilidad %>%
+  dplyr::filter(location == input$pais) %>% 
+  mutate(desplazamiento = case_when(data_type == "retail_and_recreation_perc_ch" ~ "Comercio y Recreación",
+                                    data_type == "grocery_and_pharmacy_perc_ch" ~ "Supermercados y Farmacias",
+                                    data_type == "parks_perc_ch" ~ "Parques",
+                                    data_type == "transit_stations_perc_ch" ~ "Estaciones Transporte",
+                                    data_type == "workplaces_perc_ch" ~ "Trabajo",
+                                    data_type == "residential_perc_ch" ~ "Residencia" )) %>%
+  dplyr::filter(desplazamiento==input$desp) %>% 
+  mutate(media_movil = zoo::rollmean(value, k = 7, fill = NA)) %>% 
+  dplyr::filter(!is.na(media_movil))
+})
+
+renderPlotly({
+  datos <- selectedData()
+  ggplot(datos, aes(x = date, y = media_movil)) +
+  geom_line(colour="#000099") +
+  theme_economist_white(gray_bg = FALSE)+
+  labs(title = "Datos de Movilidad (media móvil 7 días)", subtitle = toString(input$pais))+
+  xlab("Fecha")+
+  ylab("Variación % (fecha de referencia)")
+  })
+```
+
+
+Datos Movilidad Apple
+=====================================  
+
+Column {.sidebar}
+-----------------------------------------------------------------------
+
+### Menu
+
+```{r}
+selectInput('pais2', 'País', movilidad_apple$location %>% unique())
+
+selectInput('desp2', 'Tipo de Desplazamiento', movilidad_apple %>%
+              dplyr::filter(location_code == "ES") %>% 
+              mutate(desplazamiento = case_when(data_type == "driving_req_rel_volume" ~ "Coche",
+                                    data_type == "walking_req_rel_volume" ~ "Caminando",
+                                    data_type == "transit_req_rel_volume" ~ "Transporte"
+                                    )) %>% 
+              pull(desplazamiento) %>%
+              unique()
+    )
+
+```
+
+
+Column 
+-----------------------------------------------------------------------
+
+### Grafico 
+
+```{r}
+selectedData2 <- reactive({
+  movilidad_apple %>%
+  dplyr::filter(location == input$pais2) %>% 
+  mutate(desplazamiento = case_when(data_type == "driving_req_rel_volume" ~ "Coche",
+                                    data_type == "walking_req_rel_volume" ~ "Caminando",
+                                    data_type == "transit_req_rel_volume" ~ "Transporte"
+                                    )) %>% 
+  dplyr::filter(desplazamiento==input$desp2) %>% 
+  mutate(media_movil = zoo::rollmean(value, k = 7, fill = NA)) %>% 
+  dplyr::filter(!is.na(media_movil))
+})
+
+renderPlotly({
+  datos2 <- selectedData2()
+  ggplot(datos2, aes(x = date, y = media_movil)) +
+  geom_line(colour="#000099") +
+  theme_economist_white(gray_bg = FALSE)+
+  labs(title = "Datos de Movilidad (media móvil 7 días)", subtitle = toString(input$pais2))+
+  xlab("Fecha")+
+  ylab("Variación % (fecha de referencia)")
+})
+```
+
+Demanda eléctrica
+=====================================  
+
+Column {.sidebar}
+-----------------------------------------------------------------------
+
+### Menu
+
+```{r}
+selectInput('pais3', 'País', EntsoePaises %>% names)
+
+```
+
+
+Column 
+-----------------------------------------------------------------------
+
+### Grafico 
+
+```{r}
+selectedData3 <- reactive({
+  EntsoePaises[[input$pais3]] %>%
+    mutate(dt = lubridate::floor_date(dt, "hours")) %>%
+    group_by(dt) %>%
+    summarise(quantity = mean(quantity))%>%
+    ungroup() %>%
+    mutate(dt = lubridate::floor_date(dt, "days")) %>%
+    group_by(dt) %>%
+    summarise(quantity = mean(quantity)) %>% #Hasta aca datos crudos
+    mutate(media_movil = zoo::rollmean(quantity, k = 7, fill = NA)) %>% #Acá se saca la media movil
+    dplyr::filter(!is.na(media_movil)) %>% 
+    mutate(media_movil_ind = media_movil/first(media_movil)*100) %>% 
+    mutate(location=toString(input$pais3)) %>% 
+      bind_rows(EntsoePaises$Spain %>% #juntamos con df España
+                  mutate(dt = lubridate::floor_date(dt, "hours")) %>%
+                  group_by(dt) %>%
+                  summarise(quantity = mean(quantity))%>%
+                  ungroup() %>%
+                  mutate(dt = lubridate::floor_date(dt, "days")) %>%
+                  group_by(dt) %>%
+                  summarise(quantity = mean(quantity)) %>% #Hasta aca datos crudos
+                  mutate(media_movil = zoo::rollmean(quantity, k = 7, fill = NA)) %>% #Acá se saca la media movil
+                  dplyr::filter(!is.na(media_movil)) %>% 
+                  mutate(media_movil_ind = media_movil/first(media_movil)*100) %>% 
+                  mutate(location="Spain")) %>% 
+    select(-quantity, -media_movil) %>% 
+    pivot_wider(names_from = location, values_from=media_movil_ind) %>% 
+    rename(otro=input$pais3)
+})
+
+renderPlotly({
+  datos3 <- selectedData3()
+  grafico <- plot_ly(datos3, x = ~dt)
+  grafico <- grafico %>% add_trace(y = ~otro, name = toString(input$pais3), mode = 'lines')
+  grafico <- grafico %>% add_trace(y = ~Spain, name = 'España', mode = 'lines')
+  f <- list(
+    family = "Courier New, monospace",
+    size = 18,
+    color = "#7f7f7f"
+  )
+  x <- list(
+    title = "Día",
+    titlefont = f
+  )
+  y <- list(
+    title = "Demanda eléctrica en relación al 16-02-20",
+    titlefont = f
+  )
+  grafico <- grafico %>% layout(xaxis = x, yaxis = y)
+})
+```
