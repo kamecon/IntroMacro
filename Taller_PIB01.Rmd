@@ -1,5 +1,5 @@
 ---
-title: "PIB"
+title: "PIB e IPC"
 author: "Kamal Romero"
 output: 
   flexdashboard::flex_dashboard:
@@ -16,6 +16,7 @@ library(tidyverse)
 library(plotly)
 #library(ggthemes)
 load("PIB_OECD02.RData")
+load("IPC_OECD2.RData")
 ```
 
 
@@ -154,5 +155,80 @@ renderPlotly({
   ylab("Variación porcentual (%)")+
   scale_x_continuous(breaks = scales::breaks_width(4))
   ggplotly(graf4)
+})
+```
+
+
+IPC (indice)
+=====================================  
+
+Column 
+-----------------------------------------------------------------------
+
+### Grafico 
+
+```{r}
+selectedData5 <- reactive({
+  IPC_OECD2 %>%
+  dplyr::filter(LOCATION == input$pais & UNIT =="IDX") %>% 
+  select(obsTime, obsValue)
+})
+
+renderPlotly({
+  datos5 <- selectedData5()
+ grafico5 <- plot_ly(datos5, x = ~obsTime, y=~obsValue)
+ grafico5 <- grafico5 %>% add_lines(y = ~obsValue, name = 'IPC', mode = 'lines')
+ f <- list(
+  family = "Courier New, monospace",
+  size = 18,
+  color = "#7f7f7f"
+  )
+ x <- list(
+  title = "Año",
+  titlefont = f
+  )
+ y <- list(
+  title = "IPC (índice)",
+  titlefont = f
+  )
+ grafico5 <- grafico5 %>% layout(xaxis = x, yaxis = y)
+
+})
+```
+
+Inflacion (variacion IPC)
+=====================================  
+
+Column 
+-----------------------------------------------------------------------
+
+### Grafico 
+
+```{r}
+selectedData6 <- reactive({
+  IPC_OECD2 %>%
+  dplyr::filter(LOCATION == input$pais & UNIT =="PC") %>% 
+  select(obsTime, obsValue)
+})
+
+renderPlotly({
+  datos6 <- selectedData6()
+ grafico6 <- plot_ly(datos6, x = ~obsTime, y=~obsValue)
+ grafico6 <- grafico6 %>% add_lines(y = ~obsValue, name = 'Inflación', mode = 'lines')
+ f <- list(
+  family = "Courier New, monospace",
+  size = 18,
+  color = "#7f7f7f"
+  )
+ x <- list(
+  title = "Año",
+  titlefont = f
+  )
+ y <- list(
+  title = "Inflación (variación % IPC)",
+  titlefont = f
+  )
+ grafico6 <- grafico6 %>% layout(xaxis = x, yaxis = y)
+
 })
 ```

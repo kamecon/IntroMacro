@@ -104,5 +104,33 @@ for (i in seq_along(paises_cod)) {
 save(EntsoePaises, file = "EntsoePaises.RData")
 
 
+###Datos IPC (OECD) ------------------------
+
+#Vemos la estructura de la tabla o base de datos que deseamos descargar
+
+tabla_IPC <- get_data_structure("PRICES_CPI")
+
+# meses <- cross2(seq(1995,2020), 
+#                 0 %>%
+#                   paste0(seq(1,9)) %>%
+#                   c("11","12")
+# ) %>% map_chr(paste, sep = "-", collapse = "-")
+
+#Creamos un filtro con los paises y conceptos que deseamos descargar
+
+filtro <- list( c("CAN","FRA","DEU","ITA","JPN","PRT","ESP","GBR","USA", "GBR", "NLD", "DNK", "AUS", "AUT", "BEL"),
+                c("CPALTT01"),
+                c("IXOB", "GY"),
+                c("M")
+)
 
 
+
+IPC_OECD <- get_dataset(dataset = "PRICES_CPI", filter = filtro)
+
+save(IPC_OECD,file = "IPC_OECD.RData")
+
+IPC_OECD2 <- IPC_OECD %>%
+  dplyr::filter(obsTime>="1995-01")
+
+save(IPC_OECD2,file = "IPC_OECD2.RData")
