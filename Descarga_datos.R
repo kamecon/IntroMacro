@@ -133,4 +133,7 @@ save(IPC_OECD,file = "IPC_OECD.RData")
 IPC_OECD2 <- IPC_OECD %>%
   dplyr::filter(obsTime>="1995-01")
 
+#Guardamos los datos para poder acceder a ellos luego
+
 save(IPC_OECD2,file = "IPC_OECD2.RData")
+

@@ -130,3 +130,18 @@ PIB_OECD02 %>%
   pivot_wider(names_from = label, values_from = obsValue)%>%
   as.data.frame() %>%
   write.xlsx2(row.names = FALSE,file = "PIBcomponentes.xlsx")
+
+###Datos IPC (OECD) -----------
+
+#Guardamos los datos en Excel 
+
+load("IPC_OECD2.RData")
+
+IPC_OECD2 %>% 
+  dplyr::filter(LOCATION == "ESP") %>% 
+  select(obsTime, obsValue, UNIT) %>% 
+  pivot_wider(names_from = UNIT, values_from = obsValue)%>%
+  rename(Indice=IDX, Inflacion=PC) %>% 
+  as.data.frame() %>%
+  write.xlsx2(row.names = FALSE,file = "IPC_Inflacion.xlsx")
+
