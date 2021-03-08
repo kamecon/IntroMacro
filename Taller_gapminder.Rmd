@@ -1,0 +1,61 @@
+---
+title: "Gapminder"
+author: "Kamal Romero"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    social: menu
+    vertical_layout: fill
+    source_code: embed
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(tidyverse)
+library(plotly)
+#library(ggthemes)
+load("gapminder_filtrado02.RData")
+```
+
+
+Column {.sidebar data-width=350}
+=====================================
+
+### Menu
+
+```{r}
+selectInput('concepto', 'Concepto', gapminder_filtrado02 %>% select(-time,-geo,-población_total) %>% names)
+
+```
+
+
+
+PIB per capita vs. niveles de vida
+=====================================  
+
+Column 
+-----------------------------------------------------------------------
+
+### Grafico 
+
+```{r}
+selectedData <- reactive({
+   gapminder_filtrado02 %>%
+    dplyr::select(input$concepto, gnipercapita_constante_2010_us,geo) %>% 
+    rename(Concepto=input$concepto)
+ })
+
+renderPlotly({
+ datos <- selectedData()
+ grafico <- ggplot(datos, aes(x = gnipercapita_constante_2010_us, y = Concepto, label=geo)) +
+  geom_point(shape=18, size=4, color="blue")+
+  geom_smooth(method=lm, se=FALSE, linetype="dashed",color="darkred") +
+  xlab("PIB per cápita")+
+  ylab(toString(input$concepto))
+ ggplotly(grafico)
+
+})
+```
+
+
