@@ -191,7 +191,12 @@ renderPlotly({
   title = "IPC (índice)",
   titlefont = f
   )
- grafico5 <- grafico5 %>% layout(xaxis = x, yaxis = y)
+ grafico5 <- grafico5 %>%
+   layout(xaxis = x, yaxis = y) %>% 
+   layout(xaxis = list(
+              rangeslider = list(type = "date")
+              )
+          )
 
 })
 ```
@@ -228,7 +233,12 @@ renderPlotly({
   title = "Inflación (variación % IPC)",
   titlefont = f
   )
- grafico6 <- grafico6 %>% layout(xaxis = x, yaxis = y)
+ grafico6 <- grafico6 %>% 
+   layout(xaxis = x, yaxis = y) %>% 
+   layout(xaxis = list(
+              rangeslider = list(type = "date")
+              )
+          )
 
 })
 ```

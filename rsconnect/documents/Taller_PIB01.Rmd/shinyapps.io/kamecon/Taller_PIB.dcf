@@ -5,8 +5,8 @@ account: kamecon
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 3666621
-bundleId: 4312964
+bundleId: 4322200
 url: https://kamecon.shinyapps.io/Taller_PIB/
-when: 1615137982.76892
+when: 1615313226.21462
 asMultiple: FALSE
 asStatic: FALSE
