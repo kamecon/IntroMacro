@@ -145,3 +145,34 @@ IPC_OECD2 %>%
   as.data.frame() %>%
   write.xlsx2(row.names = FALSE,file = "IPC_Inflacion.xlsx")
 
+###Datos PIB por sectores (OECD) -----------
+
+#Guardamos los datos en Excel 
+
+load("PIB_SECTOR_OECD2.RData")
+
+#Colocamos los datos en formato wide
+PIB_SECTOR_OECD3 <-  PIB_SECTOR_OECD2 %>% 
+  dplyr::filter(LOCATION=="ESP") %>% 
+  select(obsTime,obsValue,label) %>% 
+  pivot_wider(names_from = label, values_from=obsValue)
+
+#Guardamos en excel
+write.xlsx2(as.data.frame(PIB_SECTOR_OECD3), row.names = FALSE, append = TRUE, sheetName = "niveles", file = "PIB_SECTOR.xlsx")
+
+#Calculamos la variacion porcentual de la tabla entera:
+#- Seleccionamos toda la tabla excepto la columna de fecha
+#- Convertimos la sub-tabla anteior a ts (objeto series de tiempo)
+#- Calculamos la variación porcentual
+#La base de este calculo es sacado de https://stackoverflow.com/questions/14614710/calculate-percentage-change-in-an-r-data-frame
+
+PIB_SECTOR_OECD4 <-  (ts(PIB_SECTOR_OECD3[2:ncol(PIB_SECTOR_OECD3)])/stats::lag(ts(PIB_SECTOR_OECD3[2:ncol(PIB_SECTOR_OECD3)]),-1) - 1)*100
+
+#Renombramos las columnas de la nueva tabla con los nombres de la tabla original (al convertirlo a ts se han cambiado los nombres de las columnas)
+colnames(PIB_SECTOR_OECD4) <-  colnames(PIB_SECTOR_OECD3)[2:length(colnames(PIB_SECTOR_OECD3))]
+
+#Añadimos la columna de fecha
+#Para poder hacer el bind convertimos la tabla anterior a tibble (era un ts)
+PIB_SECTOR_OECD4 <-  bind_cols(PIB_SECTOR_OECD3[2:nrow(PIB_SECTOR_OECD3),1],as_tibble(PIB_SECTOR_OECD4))
+
+write.xlsx2(as.data.frame(PIB_SECTOR_OECD4), row.names = FALSE, sheetName = "variaciones", append = TRUE, file = "PIB_SECTOR.xlsx")
