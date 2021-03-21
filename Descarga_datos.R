@@ -137,3 +137,33 @@ IPC_OECD2 <- IPC_OECD %>%
 
 save(IPC_OECD2,file = "IPC_OECD2.RData")
 
+
+filtro2 <- list( c("CAN","FRA","DEU","ITA","JPN","PRT","ESP","GBR","USA", "GBR", "NLD", "DNK", "AUS", "AUT", "BEL"),
+                 c("CP010000","CP020000","CP030000","CP040000","CP050000","CP060000","CP070000","CP080000","CP090000","CP100000","CP110000","CP120000","CPSDCTGY"),
+                c("IXOB", "GY"),
+                c("M")
+)
+
+IPC_OECD_RUBRO <- get_dataset(dataset = "PRICES_CPI", filter = filtro2)
+
+#Hacemos un join para que aparezcan los nombres de los conceptos en lugar de solo los id's
+#Asimismo, seleccionamos las columnas de interes y nos quedamos con los años de 1995 en adelante
+
+IPC_OECD_RUBRO2 <- IPC_OECD_RUBRO %>% 
+  left_join(tabla_IPC$SUBJECT, by = c("SUBJECT"="id")) %>%
+  separate(col = label, sep = "- ",into = c("cod","rubro")) %>%  #separar en la definicion de rubro el codigo del nombre
+  select(LOCATION, MEASURE, obsTime, obsValue, rubro) %>% 
+  dplyr::filter(obsTime >= "1995-01")
+
+#IPC por rubros
+IPC_OECD_RUBRO_NIVEL <- IPC_OECD_RUBRO2 %>% 
+  dplyr::filter(MEASURE == "IXOB")
+
+#Inflacion por rubros
+IPC_OECD_RUBRO_INFLACION <- IPC_OECD_RUBRO2 %>% 
+  dplyr::filter(MEASURE == "GY")
+
+#Guardamos los datos para poder acceder a ellos luego
+
+save(IPC_OECD_RUBRO_NIVEL,file = "IPC_OECD_RUBRO_NIVEL.RData")
+save(IPC_OECD_RUBRO_INFLACION,file = "IPC_OECD_RUBRO_INFLACION.RData")

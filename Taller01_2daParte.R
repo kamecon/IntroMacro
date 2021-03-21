@@ -120,9 +120,11 @@ EntsoePaises$ %>%
 
 ###Datos PIB (OECD) -----------
 
-#Guardamos los datos en Excel 
+#Cargamos los datos
 
 load("PIB_OECD02.RData")
+
+# "DNK" "NLD" "PRT" "DEU" "AUT" "ESP" "JPN" "FRA" "ITA" "GBR" "CAN" "USA" "BEL"
 
 PIB_OECD02 %>% 
   dplyr::filter(LOCATION == "ESP" &  MEASURE == "VOB") %>% 
@@ -133,9 +135,13 @@ PIB_OECD02 %>%
 
 ###Datos IPC (OECD) -----------
 
-#Guardamos los datos en Excel 
+#Cargamos los datos
 
 load("IPC_OECD2.RData")
+
+# "DNK" "NLD" "PRT" "DEU" "AUT" "ESP" "JPN" "FRA" "ITA" "GBR" "CAN" "USA" "BEL"
+
+#Guardamos los datos en Excel 
 
 IPC_OECD2 %>% 
   dplyr::filter(LOCATION == "ESP") %>% 
@@ -147,9 +153,11 @@ IPC_OECD2 %>%
 
 ###Datos PIB por sectores (OECD) -----------
 
-#Guardamos los datos en Excel 
+#Cargamos los datos
 
 load("PIB_SECTOR_OECD2.RData")
+
+# "DNK" "NLD" "PRT" "DEU" "AUT" "ESP" "JPN" "FRA" "ITA" "GBR" "CAN" "USA" "BEL"
 
 #Colocamos los datos en formato wide
 PIB_SECTOR_OECD3 <-  PIB_SECTOR_OECD2 %>% 
@@ -158,7 +166,11 @@ PIB_SECTOR_OECD3 <-  PIB_SECTOR_OECD2 %>%
   pivot_wider(names_from = label, values_from=obsValue)
 
 #Guardamos en excel
-write.xlsx2(as.data.frame(PIB_SECTOR_OECD3), row.names = FALSE, append = TRUE, sheetName = "niveles", file = "PIB_SECTOR.xlsx")
+write.xlsx2(as.data.frame(PIB_SECTOR_OECD3),
+            row.names = FALSE,
+            append = TRUE,
+            sheetName = "niveles",
+            file = "PIB_SECTOR.xlsx")
 
 #Calculamos la variacion porcentual de la tabla entera:
 #- Seleccionamos toda la tabla excepto la columna de fecha
@@ -175,4 +187,44 @@ colnames(PIB_SECTOR_OECD4) <-  colnames(PIB_SECTOR_OECD3)[2:length(colnames(PIB_
 #Para poder hacer el bind convertimos la tabla anterior a tibble (era un ts)
 PIB_SECTOR_OECD4 <-  bind_cols(PIB_SECTOR_OECD3[2:nrow(PIB_SECTOR_OECD3),1],as_tibble(PIB_SECTOR_OECD4))
 
-write.xlsx2(as.data.frame(PIB_SECTOR_OECD4), row.names = FALSE, sheetName = "variaciones", append = TRUE, file = "PIB_SECTOR.xlsx")
+#Guardamos los datos en Excel 
+write.xlsx2(as.data.frame(PIB_SECTOR_OECD4),
+            row.names = FALSE,
+            sheetName = "variaciones",
+            append = TRUE,
+            file = "PIB_SECTOR.xlsx")
+
+
+###Datos PIB por sectores (OECD) -----------
+
+#Cargamos los datos
+
+load("IPC_OECD_RUBRO_NIVEL.RData")
+load("IPC_OECD_RUBRO_INFLACION.RData")
+
+# "DNK" "NLD" "PRT" "DEU" "AUT" "ESP" "JPN" "FRA" "ITA" "GBR" "CAN" "USA" "BEL"
+
+#Colocamos los datos en formato wide
+IPC_OECD_RUBRO_NIVEL2 <- IPC_OECD_RUBRO_NIVEL %>%
+  dplyr::filter(LOCATION=="ESP") %>% 
+  select(obsTime,obsValue,rubro) %>% 
+  pivot_wider(names_from = rubro, values_from=obsValue)
+  
+IPC_OECD_RUBRO_INFLACION2 <- IPC_OECD_RUBRO_INFLACION %>%
+  dplyr::filter(LOCATION=="ESP") %>% 
+  select(obsTime,obsValue,rubro) %>% 
+  pivot_wider(names_from = rubro, values_from=obsValue)
+
+#Guardamos los datos en Excel 
+write.xlsx2(as.data.frame(IPC_OECD_RUBRO_NIVEL2),
+            row.names = FALSE,
+            append = TRUE,
+            sheetName = "niveles",
+            file = "IPC_SECTOR.xlsx")
+
+write.xlsx2(as.data.frame(IPC_OECD_RUBRO_INFLACION2),
+            row.names = FALSE,
+            append = TRUE,
+            sheetName = "inflacion",
+            file = "IPC_SECTOR.xlsx")
+
