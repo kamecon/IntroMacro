@@ -1,0 +1,93 @@
+---
+title: "Brecha del Producto"
+author: "Kamal Romero"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    social: menu
+    vertical_layout: fill
+    source_code: embed
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(tidyverse)
+library(plotly)
+library(openxlsx)
+#library(ggthemes)
+load("brechaPIB1.RData")
+```
+
+
+Column {.sidebar}
+=====================================
+
+### Menu
+
+```{r}
+
+selectInput('pais', 'País', brechaPIB1$Country %>% unique())
+
+# Button
+downloadButton("downloadData", "Download", class = "butt1")
+
+downloadHandler(
+    filename = function() {
+      paste(input$pais, ".xlsx", sep = "")
+    },
+    content = function(file) {
+      openxlsx::write.xlsx(as.data.frame(selectedData()), row.names = FALSE, file)
+    }
+  )
+
+```
+
+
+
+Brecha del producto
+=====================================  
+
+Column 
+-----------------------------------------------------------------------
+
+### Brecha vs España 
+
+```{r}
+selectedData <- reactive({
+  brechaGraf <- brechaPIB1 %>%
+  dplyr::filter(Country %in% c("Spain",input$pais)) %>%
+  pivot_wider(names_from = Country, values_from = Brecha) %>% 
+  rename(España=Spain, referencia=input$pais)
+})
+
+renderPlotly({
+  datos <- selectedData()
+  grafico <- plot_ly(datos, x = ~Año, y = ~España, name = 'España', type = 'scatter', mode = 'lines+markers')
+  grafico <- grafico %>% add_trace(y = ~referencia, name = toString(input$pais), mode = 'lines+markers')
+  grafico <- grafico %>% layout(legend = list(x = 0.45, y = -0.18))
+  f <- list(
+  family = "Courier New, monospace",
+  size = 18,
+  color = "#7f7f7f"
+  )
+ x <- list(
+  title = "Año",
+  titlefont = f
+  )
+ y <- list(
+  title = "Brecha del Producto",
+  titlefont = f
+  )
+ grafico <- grafico %>% layout(xaxis = x, yaxis = y,
+                               annotations = list(
+                              x = 1, y = -0.1, text = "Fuente: AMECO European Commission", 
+                              showarrow = F, xref='paper', yref='paper', 
+                              xanchor='right', yanchor='auto', xshift=0, yshift=0,
+                              font=list(size=15)))
+
+})
+
+```
+
+
