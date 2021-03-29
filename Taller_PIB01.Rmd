@@ -32,8 +32,8 @@ selectInput('pais', 'País', PIB_OECD02$LOCATION %>% unique())
 
 
 
-PIB nominal y real
-=====================================  
+PIB nominal y real {data-navmenu="Escoja una pestaña"}
+========================================================================
 
 Column 
 -----------------------------------------------------------------------
@@ -73,8 +73,8 @@ renderPlotly({
 ```
 
 
-Componentes del PIB
-=====================================
+Componentes del PIB {data-navmenu="Escoja una pestaña"}
+========================================================================
 
 
 
@@ -100,8 +100,8 @@ renderPlotly({
 })
 ```
 
-PIB real (variación porcentual)
-=====================================
+PIB real (variación porcentual) {data-navmenu="Escoja una pestaña"}
+========================================================================
 
 ### Grafico 
 
@@ -132,8 +132,8 @@ renderPlotly({
 ```
 
 
-Componentes del PIB (variación porcentual)
-=====================================
+Componentes del PIB (variación porcentual) {data-navmenu="Escoja una pestaña"}
+========================================================================
 
 
 ### Grafico 
@@ -159,8 +159,8 @@ renderPlotly({
 ```
 
 
-IPC (indice)
-=====================================  
+IPC (indice) {data-navmenu="Escoja una pestaña"}
+======================================================================== 
 
 Column 
 -----------------------------------------------------------------------
@@ -201,8 +201,8 @@ renderPlotly({
 })
 ```
 
-Inflacion (variacion IPC)
-=====================================  
+Inflacion (variacion IPC) {data-navmenu="Escoja una pestaña"}
+========================================================================  
 
 Column 
 -----------------------------------------------------------------------
