@@ -15,8 +15,10 @@ library(flexdashboard)
 library(tidyverse)
 library(plotly)
 library(openxlsx)
+library(ggpmisc)
 #library(ggthemes)
 load("brechaPIB1.RData")
+load("RENTA_OECD02.RData")
 ```
 
 
@@ -89,5 +91,52 @@ renderPlotly({
 })
 
 ```
+
+
+Funcion Consumo
+=====================================  
+
+Column 
+-----------------------------------------------------------------------
+
+### Consumo vs Ingreso
+
+```{r}
+selectedData <- reactive({
+  brechaGraf <- brechaPIB1 %>%
+  dplyr::filter(Country %in% c("Spain",input$pais)) %>%
+  pivot_wider(names_from = Country, values_from = Brecha) %>% 
+  rename(España=Spain, referencia=input$pais)
+})
+
+renderPlotly({
+  datos <- selectedData()
+  grafico <- plot_ly(datos, x = ~Año, y = ~España, name = 'España', type = 'scatter', mode = 'lines+markers')
+  grafico <- grafico %>% add_trace(y = ~referencia, name = toString(input$pais), mode = 'lines+markers')
+  grafico <- grafico %>% layout(legend = list(x = 0.45, y = -0.18))
+  f <- list(
+  family = "Courier New, monospace",
+  size = 18,
+  color = "#7f7f7f"
+  )
+ x <- list(
+  title = "Año",
+  titlefont = f
+  )
+ y <- list(
+  title = "Brecha del Producto",
+  titlefont = f
+  )
+ grafico <- grafico %>% layout(xaxis = x, yaxis = y,
+                               annotations = list(
+                              x = 1, y = -0.1, text = "Fuente: AMECO European Commission", 
+                              showarrow = F, xref='paper', yref='paper', 
+                              xanchor='right', yanchor='auto', xshift=0, yshift=0,
+                              font=list(size=15)))
+
+})
+
+```
+
 
 
