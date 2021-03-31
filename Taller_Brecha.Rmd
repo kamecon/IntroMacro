@@ -22,8 +22,11 @@ load("RENTA_OECD02.RData")
 ```
 
 
+Brecha del producto
+=====================================  
+
 Column {.sidebar}
-=====================================
+-----------------------------------------------------------------------
 
 ### Menu
 
@@ -46,9 +49,6 @@ downloadHandler(
 ```
 
 
-
-Brecha del producto
-=====================================  
 
 Column 
 -----------------------------------------------------------------------
@@ -96,44 +96,42 @@ renderPlotly({
 Funcion Consumo
 =====================================  
 
+Column {.sidebar}
+-----------------------------------------------------------------------
+
+### Menu
+
+```{r}
+selectInput('pais2', 'País', RENTA_OECD02$LOCATION %>% unique())
+
+# Button
+downloadButton("downloadData", "Download", class = "butt1")
+
+```
+
+
 Column 
 -----------------------------------------------------------------------
 
 ### Consumo vs Ingreso
 
 ```{r}
-selectedData <- reactive({
-  brechaGraf <- brechaPIB1 %>%
-  dplyr::filter(Country %in% c("Spain",input$pais)) %>%
-  pivot_wider(names_from = Country, values_from = Brecha) %>% 
-  rename(España=Spain, referencia=input$pais)
+selectedData2 <- reactive({
+  RENTA_OECD02 %>%
+  dplyr::filter(LOCATION==input$pais2) %>%
+  select(obsTime, obsValue, INDICATOR) %>%
+  pivot_wider(names_from = INDICATOR, values_from=obsValue) %>% 
+  ggplot(aes(x=B5NG, y=P31S14_S15G)) +
+  geom_point() +
+  geom_smooth(method = "lm", formula = y ~ x, se=F) +
+  labs(title = "Función Consumo", x= "Variación del Ingreso Nacional", y="Variación del Consumo de los hogares", caption = 'Fuente = OECD') +
+  theme(plot.title=element_text(face="bold",hjust=0.5,vjust=2,colour="#3C3C3C",size=12)) +
+  stat_poly_eq(aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")), label.x.npc = "right", label.y.npc = 0.15,
+               formula = y ~ x, parse = TRUE, size = 3)  
 })
 
-renderPlotly({
-  datos <- selectedData()
-  grafico <- plot_ly(datos, x = ~Año, y = ~España, name = 'España', type = 'scatter', mode = 'lines+markers')
-  grafico <- grafico %>% add_trace(y = ~referencia, name = toString(input$pais), mode = 'lines+markers')
-  grafico <- grafico %>% layout(legend = list(x = 0.45, y = -0.18))
-  f <- list(
-  family = "Courier New, monospace",
-  size = 18,
-  color = "#7f7f7f"
-  )
- x <- list(
-  title = "Año",
-  titlefont = f
-  )
- y <- list(
-  title = "Brecha del Producto",
-  titlefont = f
-  )
- grafico <- grafico %>% layout(xaxis = x, yaxis = y,
-                               annotations = list(
-                              x = 1, y = -0.1, text = "Fuente: AMECO European Commission", 
-                              showarrow = F, xref='paper', yref='paper', 
-                              xanchor='right', yanchor='auto', xshift=0, yshift=0,
-                              font=list(size=15)))
-
+renderPlot({
+  selectedData2()
 })
 
 ```
