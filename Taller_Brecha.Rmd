@@ -17,7 +17,7 @@ library(plotly)
 library(openxlsx)
 library(ggpmisc)
 #library(ggthemes)
-load("brechaPIB1.RData")
+load("brechaPIB2.RData")
 load("RENTA_OECD02.RData")
 ```
 
@@ -32,7 +32,7 @@ Column {.sidebar}
 
 ```{r}
 
-selectInput('pais', 'País', brechaPIB1$Country %>% unique())
+selectInput('pais', 'País', brechaPIB2$country %>% unique())
 
 # Button
 downloadButton("downloadData", "Download", class = "butt1")
@@ -57,10 +57,10 @@ Column
 
 ```{r}
 selectedData <- reactive({
-  brechaGraf <- brechaPIB1 %>%
-  dplyr::filter(Country %in% c("Spain",input$pais)) %>%
-  pivot_wider(names_from = Country, values_from = Brecha) %>% 
-  rename(España=Spain, referencia=input$pais)
+  brechaGraf <- brechaPIB2 %>%
+  dplyr::filter(country %in% c("ESP",input$pais)) %>%
+  pivot_wider(names_from = country, values_from = values) %>% 
+  rename(España=ESP, referencia=input$pais)
 })
 
 renderPlotly({
