@@ -59,8 +59,8 @@ Column
 selectedData <- reactive({
   brechaGraf <- brechaPIB2 %>%
   dplyr::filter(country %in% c("ESP",input$pais)) %>%
-  pivot_wider(names_from = country, values_from = values) %>% 
-  rename(España=ESP, referencia=input$pais)
+  pivot_wider(names_from = country, values_from = value) %>% 
+  rename(Año=original_period, España=ESP, referencia=input$pais)
 })
 
 renderPlotly({
@@ -83,7 +83,7 @@ renderPlotly({
   )
  grafico <- grafico %>% layout(xaxis = x, yaxis = y,
                                annotations = list(
-                              x = 1, y = -0.1, text = "Fuente: AMECO European Commission", 
+                              x = 1, y = -0.1, text = "Fuente: Informe de perspectivas mundiales. FMI", 
                               showarrow = F, xref='paper', yref='paper', 
                               xanchor='right', yanchor='auto', xshift=0, yshift=0,
                               font=list(size=15)))

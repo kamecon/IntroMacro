@@ -21,6 +21,9 @@ save(brechaPIB1, file = "brechaPIB1.RData")
 
 ### Datos DBnomics con WEO (incluye Japón y Canadá pero no media EU) --------
 
+# Creamos una "mascara" para pasarla por el buscador e indicarle los paises y la variable que buscamos
+# Quedaría asi: pais01+pais02+pais03.concepto.unidades
+
 country = c("CAN","FRA","DEU","ITA","JPN","PRT","ESP","GBR","USA", "GBR", "NLD", "DNK", "AUS", "AUT", "BEL")
 indicator=c("NGAP_NPGDP.pcent_potential_gdp")
 
