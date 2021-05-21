@@ -19,6 +19,7 @@ library(ggpmisc)
 #library(ggthemes)
 load("brechaPIB2.RData")
 load("RENTA_OECD02.RData")
+load("data_ca.RData")
 ```
 
 
@@ -137,4 +138,55 @@ renderPlot({
 ```
 
 
+Cuenta Corriente
+=====================================  
+
+Column {.sidebar}
+-----------------------------------------------------------------------
+
+### Menu
+
+```{r}
+selectInput('pais3', 'País', data_ca$country %>% unique())
+
+```
+
+Column 
+-----------------------------------------------------------------------
+
+### Cuenta Corriente
+
+```{r}
+selectedData3 <- reactive({
+  data_ca %>%
+  dplyr::filter(country == input$pais3)
+})
+
+renderPlotly({
+  datosCC <- selectedData3()
+  grafico <- plot_ly(datosCC, x = ~time, y = ~value, name = toString(input$pais3), type = 'scatter', mode = 'lines+markers')
+  grafico <- grafico %>% layout(legend = list(x = 0.45, y = -0.18))
+f <- list(
+  family = "Courier New, monospace",
+  size = 18,
+  color = "#7f7f7f"
+)
+x <- list(
+  title = "Año",
+  titlefont = f
+)
+y <- list(
+  title = "Cuenta corriente",
+  titlefont = f
+)
+grafico <- grafico %>% layout(xaxis = x, yaxis = y,
+                              annotations = list(
+                                x = 1, y = -0.1, text = "Fuente: Fondo Monetario Internacional", 
+                                showarrow = F, xref='paper', yref='paper', 
+                                xanchor='right', yanchor='auto', xshift=0, yshift=0,
+                                font=list(size=15)))
+
+})
+
+```
 
