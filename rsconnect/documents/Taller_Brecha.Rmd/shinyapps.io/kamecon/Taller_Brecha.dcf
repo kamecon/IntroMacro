@@ -5,8 +5,8 @@ account: kamecon
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 3880951
-bundleId: 4496223
+bundleId: 4626988
 url: https://kamecon.shinyapps.io/Taller_Brecha/
-when: 1618935075.82631
+when: 1621668400.4
 asMultiple: FALSE
 asStatic: FALSE

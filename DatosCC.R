@@ -1,7 +1,7 @@
 
 # Cargar librerias --------------------------------------------------------
 
-pacman::p_load(IMFData, tidyverse)
+pacman::p_load(IMFData, tidyverse, xlsx)
 
 
 # Buscar codigos ----------------------------------------------------------
@@ -10,7 +10,7 @@ pacman::p_load(IMFData, tidyverse)
 availableDB <- DataflowMethod()
 
 availableDB %>% 
-  dplyr::filter(str_detect(DatabaseID, "^BOP"))
+  dplyr::filter(str_detect(DatabaseID, "^BOP")) 
 
 BOP.available.codes <- DataStructureMethod("BOP")
 
@@ -45,8 +45,12 @@ paises <- CAquery_dc$`@REF_AREA` %>% as.vector()
 
 names(CAquery_dc$Obs) <- paises
 
+#Creamos una lista de paises para formar los grupos
 paises2 <- BOP.available.codes$CL_AREA_BOP %>%
   dplyr::filter(CodeValue %in% paises)
+
+write.xlsx(x = paises2, file = "paises.xlsx", row.names = FALSE)
+
 
 #Creamos el data framne
 
